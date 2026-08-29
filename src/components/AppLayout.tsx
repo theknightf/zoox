@@ -1,5 +1,8 @@
+'use client';
 import React from 'react';
 import Sidebar from './Sidebar';
+import Header from './Header';
+import { useApp } from '@/context/AppContext';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -7,12 +10,18 @@ interface AppLayoutProps {
   role?: 'owner' | 'manager' | 'staff' | 'customer';
 }
 
-export default function AppLayout({ children, currentPath, role = 'staff' }: AppLayoutProps) {
+export default function AppLayout({ children, currentPath }: AppLayoutProps) {
+  const { currentRole, language } = useApp();
+
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar currentPath={currentPath} role={role} />
-      <main className="flex-1 min-w-0 overflow-auto">
-        {children}
+    <div
+      className="flex min-h-screen bg-background overflow-x-hidden w-full"
+      dir={language === 'ar' ? 'rtl' : 'ltr'}
+    >
+      <Sidebar currentPath={currentPath} role={currentRole} />
+      <main className="flex-1 min-w-0 overflow-auto flex flex-col">
+        <Header />
+        <div className="flex-grow">{children}</div>
       </main>
     </div>
   );

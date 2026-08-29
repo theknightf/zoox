@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '@/i18n';
 import { Monitor, DoorOpen, Clock, TrendingUp, AlertTriangle, Users } from 'lucide-react';
 
 const stats = [
@@ -37,7 +38,7 @@ const stats = [
   },
   {
     id: 'stat-revenue',
-    label: "Today\'s Revenue",
+    label: "Today's Revenue",
     value: '2,840',
     sub: 'EGP since shift start',
     icon: <TrendingUp size={20} />,
@@ -71,6 +72,7 @@ const stats = [
 ];
 
 export default function QuickStatsRow() {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
       {stats?.map((stat) => (
@@ -83,12 +85,12 @@ export default function QuickStatsRow() {
               <span className={stat?.color}>{stat?.icon}</span>
             </div>
             {stat?.trend && (
-              <span className="text-xs text-accent font-medium">{stat?.trend}</span>
+              <span className="text-xs text-accent font-medium">{t(stat?.trend)}</span>
             )}
           </div>
           <p className={`text-2xl font-bold font-tabular ${stat?.color}`}>{stat?.value}</p>
-          <p className="text-xs font-semibold text-foreground mt-0.5">{stat?.label}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{stat?.sub}</p>
+          <p className="text-xs font-semibold text-foreground mt-0.5">{t(stat?.label)}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t(stat?.sub)}</p>
         </div>
       ))}
     </div>

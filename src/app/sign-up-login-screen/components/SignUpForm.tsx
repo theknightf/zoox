@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface SignUpFormData {
   name: string;
@@ -17,6 +18,7 @@ interface SignUpFormProps {
 }
 
 export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,64 +43,83 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
   return (
     <div className="fade-in">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Create account</h1>
-        <p className="text-sm text-muted-foreground mt-1">Join Zoox as a customer to book sessions and track loyalty</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('Create account')}</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {t('Join Zoox as a customer to book sessions and track loyalty')}
+        </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-1.5">Full Name</label>
+          <label className="block text-sm font-semibold text-foreground mb-1.5">
+            {t('Full Name')}
+          </label>
           <input
             type="text"
             className={`input-field ${errors.name ? 'border-danger' : ''}`}
             placeholder="Ahmed Mohamed"
-            {...register('name', { required: 'Full name is required' })}
+            {...register('name', { required: t('Full name is required') })}
           />
           {errors.name && <p className="text-xs text-danger mt-1">{errors.name.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-1.5">Email address</label>
+          <label className="block text-sm font-semibold text-foreground mb-1.5">
+            {t('Email address')}
+          </label>
           <input
             type="email"
             className={`input-field ${errors.email ? 'border-danger' : ''}`}
             placeholder="you@gmail.com"
             {...register('email', {
-              required: 'Email is required',
-              pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email' },
+              required: t('Email is required'),
+              pattern: { value: /^\S+@\S+\.\S+$/, message: t('Enter a valid email') },
             })}
           />
           {errors.email && <p className="text-xs text-danger mt-1">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-1.5">Phone Number</label>
-          <p className="text-xs text-muted-foreground mb-1.5">Egyptian mobile number — used for reservations and notifications</p>
+          <label className="block text-sm font-semibold text-foreground mb-1.5">
+            {t('Phone Number')}
+          </label>
+          <p className="text-xs text-muted-foreground mb-1.5">
+            {t('Egyptian mobile number — used for reservations and notifications')}
+          </p>
           <input
             type="tel"
             className={`input-field ${errors.phone ? 'border-danger' : ''}`}
             placeholder="01xxxxxxxxx"
             {...register('phone', {
-              required: 'Phone number is required',
-              pattern: { value: /^01[0-9]{9}$/, message: 'Enter a valid Egyptian mobile number' },
+              required: t('Phone number is required'),
+              pattern: {
+                value: /^01[0-9]{9}$/,
+                message: t('Enter a valid Egyptian mobile number'),
+              },
             })}
           />
           {errors.phone && <p className="text-xs text-danger mt-1">{errors.phone.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-1.5">Password</label>
+          <label className="block text-sm font-semibold text-foreground mb-1.5">
+            {t('Password')}
+          </label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
               className={`input-field pr-10 ${errors.password ? 'border-danger' : ''}`}
-              placeholder="Min. 8 characters"
+              placeholder={t('Min. 8 characters')}
               {...register('password', {
-                required: 'Password is required',
-                minLength: { value: 8, message: 'Minimum 8 characters' },
+                required: t('Password is required'),
+                minLength: { value: 8, message: t('Minimum 8 characters') },
               })}
             />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
@@ -106,22 +127,30 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-1.5">Confirm Password</label>
+          <label className="block text-sm font-semibold text-foreground mb-1.5">
+            {t('Confirm Password')}
+          </label>
           <div className="relative">
             <input
               type={showConfirm ? 'text' : 'password'}
               className={`input-field pr-10 ${errors.confirmPassword ? 'border-danger' : ''}`}
-              placeholder="Re-enter password"
+              placeholder={t('Re-enter password')}
               {...register('confirmPassword', {
-                required: 'Please confirm your password',
-                validate: (val) => val === password || 'Passwords do not match',
+                required: t('Please confirm your password'),
+                validate: (val) => val === password || t('Passwords do not match'),
               })}
             />
-            <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
               {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          {errors.confirmPassword && <p className="text-xs text-danger mt-1">{errors.confirmPassword.message}</p>}
+          {errors.confirmPassword && (
+            <p className="text-xs text-danger mt-1">{errors.confirmPassword.message}</p>
+          )}
         </div>
 
         <div>
@@ -129,13 +158,17 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
             <input
               type="checkbox"
               className="w-4 h-4 mt-0.5 rounded border-border bg-input accent-primary flex-shrink-0"
-              {...register('terms', { required: 'You must accept the terms to continue' })}
+              {...register('terms', { required: t('You must accept the terms to continue') })}
             />
             <span className="text-sm text-muted-foreground">
               I agree to the{' '}
-              <span className="text-primary font-semibold hover:underline cursor-pointer">Terms of Service</span>
-              {' '}and{' '}
-              <span className="text-primary font-semibold hover:underline cursor-pointer">Privacy Policy</span>
+              <span className="text-primary font-semibold hover:underline cursor-pointer">
+                {t('Terms of Service')}
+              </span>{' '}
+              and{' '}
+              <span className="text-primary font-semibold hover:underline cursor-pointer">
+                {t('Privacy Policy')}
+              </span>
             </span>
           </label>
           {errors.terms && <p className="text-xs text-danger mt-1">{errors.terms.message}</p>}
@@ -151,16 +184,16 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
           ) : (
             <>
               <UserPlus size={16} />
-              Create Account
+              {t('Create Account')}
             </>
           )}
         </button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground mt-6">
-        Already have an account?{' '}
+        {t('Already have an account?')}{' '}
         <button onClick={onSwitchToLogin} className="text-primary font-semibold hover:underline">
-          Sign in
+          {t('Sign in')}
         </button>
       </p>
     </div>

@@ -1,12 +1,32 @@
 'use client';
 import React, { useState } from 'react';
-import ReservationsHeader from './ReservationsHeader';
-import ReservationFilters from './ReservationFilters';
-import ReservationsTable from './ReservationsTable';
-import ReservationDrawer from './ReservationDrawer';
-import { Toaster } from 'sonner';
+import { useApp } from '@/context/AppContext';
+import {
+  Clock,
+  ShieldAlert,
+  Award,
+  PlayCircle,
+  Plus,
+  CheckCircle,
+  RefreshCcw,
+  UserMinus,
+  AlertTriangle,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useTranslation } from '@/i18n';
 
-export type ReservationStatus = 'Reserved' | 'Arrived' | 'Active' | 'Completed' | 'Cancelled' | 'No Show' | 'Waiting' | 'Late';
+export type ReservationStatus =
+  | 'Confirmed'
+  | 'Pending'
+  | 'No-Show'
+  | 'Arrived'
+  | 'Active'
+  | 'Completed'
+  | 'Cancelled'
+  | 'Waiting'
+  | 'Late'
+  | 'Reserved'
+  | 'No Show';
 
 export interface Reservation {
   id: string;
@@ -26,74 +46,359 @@ export interface Reservation {
   customerStatus: 'New' | 'Regular' | 'Loyal' | 'VIP' | 'Low Reliability';
 }
 
-export const mockReservations: Reservation[] = [
-  { id: 'res-001', customer: 'Mohamed Khalil', phone: '01001234521', room: 'Room 1', roomType: 'Standard', game: 'FC 26', players: 2, date: '2026-08-08', time: '14:30', duration: null, status: 'Active', sessionType: 'open', createdBy: 'staff', customerStatus: 'Regular' },
-  { id: 'res-002', customer: 'Ahmed Samir', phone: '01124568834', room: 'Room 2', roomType: 'Standard', game: 'GTA V', players: 4, date: '2026-08-08', time: '13:45', duration: '120', status: 'Active', sessionType: 'fixed', createdBy: 'customer', customerStatus: 'Loyal' },
-  { id: 'res-003', customer: 'Omar Sherif', phone: '01005671234', room: 'Room 3', roomType: 'Premium', game: 'Call of Duty', players: 2, date: '2026-08-08', time: '16:00', duration: '60', status: 'Reserved', sessionType: 'fixed', createdBy: 'customer', customerStatus: 'Regular', notes: 'First visit — new customer' },
-  { id: 'res-004', customer: 'Karim Mostafa', phone: '01119872267', room: 'Room 4', roomType: 'VIP', game: 'FC 26', players: 6, date: '2026-08-08', time: '14:00', duration: null, status: 'Active', sessionType: 'open', createdBy: 'staff', customerStatus: 'VIP', notes: 'VIP — extra drinks requested' },
-  { id: 'res-005', customer: 'Tarek Samir', phone: '01009871234', room: 'Room 3', roomType: 'Premium', game: 'Call of Duty', players: 2, date: '2026-08-08', time: '16:00', duration: '60', status: 'Reserved', sessionType: 'fixed', createdBy: 'customer', customerStatus: 'New' },
-  { id: 'res-006', customer: 'Nour Ibrahim', phone: '01154321234', room: 'Room 5', roomType: 'Standard', game: 'FC 26', players: 4, date: '2026-08-08', time: '16:15', duration: '90', status: 'Reserved', sessionType: 'fixed', createdBy: 'staff', customerStatus: 'Regular' },
-  { id: 'res-007', customer: 'Hassan Mostafa', phone: '01231456789', room: 'Room 6', roomType: 'Premium', game: 'PES 2024', players: 2, date: '2026-08-08', time: '12:00', duration: '60', status: 'Completed', sessionType: 'fixed', createdBy: 'customer', customerStatus: 'Loyal' },
-  { id: 'res-008', customer: 'Ramy Adel', phone: '01009876543', room: 'Room 7', roomType: 'Standard', game: 'GTA V', players: 2, date: '2026-08-08', time: '11:30', duration: '60', status: 'No Show', sessionType: 'fixed', createdBy: 'customer', customerStatus: 'Low Reliability' },
-  { id: 'res-009', customer: 'Salma Youssef', phone: '01122334455', room: 'Room 8', roomType: 'VIP', game: 'FC 26', players: 4, date: '2026-08-08', time: '17:00', duration: null, status: 'Waiting', sessionType: 'open', createdBy: 'staff', customerStatus: 'Regular' },
-  { id: 'res-010', customer: 'Walid Hassan', phone: '01098765432', room: 'Room 8', roomType: 'VIP', game: 'GTA V', players: 6, date: '2026-08-08', time: '16:30', duration: '90', status: 'Reserved', sessionType: 'fixed', createdBy: 'customer', customerStatus: 'Loyal' },
-  { id: 'res-011', customer: 'Dina Khaled', phone: '01234567890', room: 'Room 2', roomType: 'Standard', game: 'Call of Duty', players: 2, date: '2026-08-07', time: '18:00', duration: '60', status: 'Completed', sessionType: 'fixed', createdBy: 'customer', customerStatus: 'New' },
-  { id: 'res-012', customer: 'Amr Nasser', phone: '01001112233', room: 'Room 1', roomType: 'Standard', game: 'FC 26', players: 2, date: '2026-08-07', time: '20:00', duration: '90', status: 'Cancelled', sessionType: 'fixed', createdBy: 'staff', customerStatus: 'Regular', notes: 'Cancelled by customer — 2h before' },
-];
-
 export default function ReservationsContent() {
-  const [reservations, setReservations] = useState<Reservation[]>(mockReservations);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ReservationStatus | 'all'>('all');
-  const [dateFilter, setDateFilter] = useState('2026-08-08');
+  const { t } = useTranslation();
+  const { reservations, waitingList, assignRoomFromWaitlist, currentRole, sessions, addSession } =
+    useApp();
 
-  const filtered = reservations.filter((r) => {
-    const matchesSearch =
-      !searchQuery ||
-      r.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.phone.includes(searchQuery) ||
-      r.room.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.game.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
-    const matchesDate = !dateFilter || r.date === dateFilter;
-    return matchesSearch && matchesStatus && matchesDate;
+  const [localReservations, setLocalReservations] = useState(reservations);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showConfirmId, setShowConfirmId] = useState<string | null>(null);
+  const [assignTarget, setAssignTarget] = useState<any | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState('');
+
+  const handleConfirmReservation = (id: string) => {
+    // Save confirmation
+    setLocalReservations((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, status: 'Confirmed' as const } : r))
+    );
+    setShowConfirmId(null);
+    toast.success(t('Reservation confirmed successfully.'));
+  };
+
+  const triggerConfirmAction = (res: (typeof reservations)[0]) => {
+    if (res.previousNoShowFlag) {
+      setShowConfirmId(res.id);
+    } else {
+      setLocalReservations((prev) =>
+        prev.map((r) => (r.id === res.id ? { ...r, status: 'Confirmed' as const } : r))
+      );
+      toast.success(t('Reservation confirmed.'));
+    }
+  };
+
+  const handleNoShow = (id: string) => {
+    setLocalReservations((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, status: 'No-Show' as const } : r))
+    );
+    toast.error(t('Reservation marked as No-Show.'));
+  };
+
+  const filteredReservations = localReservations.filter((res) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      res.customerName.toLowerCase().includes(q) ||
+      res.customerPhone.includes(q) ||
+      res.roomType.toLowerCase().includes(q)
+    );
   });
 
-  const handleAddReservation = (newRes: Reservation) => {
-    setReservations((prev) => [newRes, ...prev]);
-    setDrawerOpen(false);
-  };
-
-  const handleStatusChange = (id: string, status: ReservationStatus) => {
-    setReservations((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status } : r))
-    );
-  };
-
   return (
-    <div className="p-4 lg:p-6 xl:p-8 max-w-screen-2xl mx-auto">
-      <Toaster position="bottom-right" theme="dark" />
-      <ReservationsHeader onNewReservation={() => setDrawerOpen(true)} count={filtered.length} />
-      <ReservationFilters
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        dateFilter={dateFilter}
-        onDateChange={setDateFilter}
-        reservations={reservations}
-      />
-      <ReservationsTable
-        reservations={filtered}
-        onStatusChange={handleStatusChange}
-      />
-      {drawerOpen && (
-        <ReservationDrawer
-          onClose={() => setDrawerOpen(false)}
-          onSave={handleAddReservation}
-        />
+    <>
+      <div className="p-4 lg:p-6 xl:p-8 max-w-screen-2xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t('Reservations & Live Waiting List')}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {t(
+              'Approve bookings, monitor customer reliability scores, and allocate rooms to walk-in waiting lists.'
+            )}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Active Reservations Table */}
+          <div className="xl:col-span-2 card-base p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                {t('Booking Schedule')}
+              </h2>
+              <input
+                type="text"
+                placeholder={t('Search by customer name or phone...')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input-field max-w-xs py-1.5 text-xs"
+              />
+            </div>
+
+            <div className="overflow-x-auto scrollbar-thin">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-border text-muted-foreground uppercase font-bold">
+                    <th className="py-2.5 px-2">{t('Customer')}</th>
+                    <th className="py-2.5 px-2">{t('Phone')}</th>
+                    <th className="py-2.5 px-2">{t('Time')}</th>
+                    <th className="py-2.5 px-2">{t('Room Type')}</th>
+                    <th className="py-2.5 px-2">{t('Reliability')}</th>
+                    <th className="py-2.5 px-2">{t('Status')}</th>
+                    <th className="py-2.5 px-2 text-right">{t('Actions')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/40">
+                  {filteredReservations.map((res) => (
+                    <tr key={res.id} className="hover:bg-muted/10">
+                      <td className="py-3 px-2">
+                        <p className="font-bold text-foreground">{res.customerName}</p>
+                        {res.customerHistoryNotes && (
+                          <span className="text-[10px] text-muted-foreground block truncate max-w-[200px]">
+                            {res.customerHistoryNotes}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-2 font-mono text-muted-foreground whitespace-nowrap">
+                        {res.customerPhone}
+                      </td>
+                      <td className="py-3 px-2 font-semibold text-foreground whitespace-nowrap">
+                        {res.dateTime.split('T')[1].substring(0, 5)}
+                      </td>
+                      <td className="py-3 px-2">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            res.roomType === 'VIP'
+                              ? 'bg-warning/10 text-warning border border-warning/20'
+                              : res.roomType === 'Premium'
+                                ? 'bg-info/10 text-info border border-info/20'
+                                : 'bg-muted text-muted-foreground border border-border'
+                          }`}
+                        >
+                          {t(res.roomType)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2">
+                        {res.previousNoShowFlag ? (
+                          <span className="bg-danger/10 border border-danger/20 text-danger text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 w-max">
+                            <ShieldAlert size={10} />
+                            {t('LOW RELIABILITY')}
+                          </span>
+                        ) : (
+                          <span className="bg-accent/10 border border-accent/20 text-accent text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 w-max">
+                            <Award size={10} />
+                            {t('EXCELLENT')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-2">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                            res.status === 'Confirmed'
+                              ? 'bg-accent/10 border-accent/20 text-accent'
+                              : res.status === 'No-Show'
+                                ? 'bg-danger/10 border-danger/20 text-danger'
+                                : 'bg-warning/10 border-warning/20 text-warning animate-pulse'
+                          }`}
+                        >
+                          {t(res.status)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 text-right space-x-1 whitespace-nowrap">
+                        {res.status === 'Pending' && (
+                          <>
+                            <button
+                              onClick={() => triggerConfirmAction(res)}
+                              className="px-2.5 py-1 bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 rounded font-bold text-[10px] inline-flex items-center gap-1"
+                            >
+                              <CheckCircle size={10} />
+                              {t('Confirm')}
+                            </button>
+                            <button
+                              onClick={() => handleNoShow(res.id)}
+                              className="px-2.5 py-1 bg-danger/10 border border-danger/30 text-danger hover:bg-danger/20 rounded font-bold text-[10px] inline-flex items-center gap-1"
+                            >
+                              <UserMinus size={10} />
+                              {t('No-Show')}
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Live Waiting List Queue */}
+          <div className="card-base p-5 space-y-4">
+            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+              {t('Waiting List Queue')}
+            </h2>
+
+            <div className="space-y-3 max-h-[480px] overflow-y-auto scrollbar-thin pr-1">
+              {waitingList.map((wl) => (
+                <div
+                  key={wl.id}
+                  className="bg-muted/30 border border-border/40 rounded-xl p-3.5 space-y-3.5"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-xs font-bold text-foreground">{wl.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{wl.phone}</p>
+                    </div>
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded border border-warning/20 bg-warning/10 text-warning">
+                      {t(wl.roomType)} {t('Tier')}
+                    </span>
+                  </div>
+
+                  {wl.note && (
+                    <p className="text-[10px] italic text-muted-foreground">
+                      {t('Notes:')} {wl.note}
+                    </p>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setAssignTarget(wl)}
+                      className="w-full py-1.5 bg-warning/10 hover:bg-warning/20 border border-warning/30 text-warning text-[10px] font-extrabold rounded-md flex items-center justify-center gap-1"
+                    >
+                      <PlayCircle size={12} />
+                      {t('ASSIGN ROOM NOW')}
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {waitingList.length === 0 && (
+                <p className="text-xs text-muted-foreground italic text-center py-6">
+                  {t('Waiting list is currently empty.')}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* No-Show Alert Approval modal */}
+      {showConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/80" />
+          <div className="bg-card border border-border p-5 rounded-2xl w-full max-w-sm shadow-2xl z-10 space-y-4">
+            <div className="flex items-start gap-2.5 text-danger bg-danger/10 p-3 rounded-lg border border-danger/20">
+              <AlertTriangle size={24} className="flex-shrink-0" />
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider">
+                  {t('No-Show Reliability Alert')}
+                </h3>
+                <p className="text-[11px] text-danger-foreground/90 mt-1 leading-snug">
+                  {t(
+                    'This customer has missed previous reservations without notifying the staff. Are you sure you want to approve this booking slot?'
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => setShowConfirmId(null)}
+                className="btn-secondary flex-1 py-2 text-xs"
+              >
+                {t('Go Back')}
+              </button>
+              <button
+                onClick={() => handleConfirmReservation(showConfirmId)}
+                className="btn-primary bg-danger border-danger hover:opacity-90 flex-1 py-2 text-xs text-white"
+              >
+                {t('Force Approve')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-    </div>
+
+      {assignTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/80" onClick={() => setAssignTarget(null)} />
+          <div className="bg-card border border-border p-5 rounded-2xl w-full max-w-sm shadow-2xl z-10 space-y-4">
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                {t('Assign Room to')} {assignTarget.name}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {t('Select an available room to check them in.')}
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">
+                {t('Available Rooms')}
+              </label>
+              <select
+                className="input-field"
+                value={selectedRoom}
+                onChange={(e) => setSelectedRoom(e.target.value)}
+              >
+                <option value="">{t('-- Choose Room --')}</option>
+                {[
+                  'Room VIP-1',
+                  'Room VIP-2',
+                  'Room 3',
+                  'Room 4',
+                  'Room 5',
+                  'Room 6',
+                  'Room 7',
+                  'Room 8',
+                  'Room 9',
+                  'Room 10',
+                  'Room 11',
+                  'Room 12',
+                ]
+                  .filter((r) => !sessions.map((s) => s.room).includes(r))
+                  .map((room) => (
+                    <option key={room} value={room}>
+                      {room}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => {
+                  setAssignTarget(null);
+                  setSelectedRoom('');
+                }}
+                className="btn-secondary flex-1 py-2 text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (!selectedRoom) {
+                    toast.error(t('Please select a room.'));
+                    return;
+                  }
+                  assignRoomFromWaitlist(assignTarget.id, selectedRoom);
+                  addSession({
+                    room: selectedRoom,
+                    roomType: assignTarget.roomType,
+                    consoleTier: selectedRoom.includes('VIP') ? 'PS5 PRO' : 'PS5 Standard',
+                    customer: assignTarget.name,
+                    phone: assignTarget.phone,
+                    openingStaff: 'Omar M.',
+                    startTime: new Date().toLocaleTimeString('en-EG', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    }),
+                    isOpenEnded: true,
+                    hourlyRate: selectedRoom.includes('VIP') ? 150 : 80,
+                    controllers: ['Pad #1', 'Pad #2'],
+                  });
+                  toast.success(
+                    `${t('Successfully assigned')} ${selectedRoom} ${t('to')} ${assignTarget.name}!`
+                  );
+                  setAssignTarget(null);
+                  setSelectedRoom('');
+                }}
+                className="btn-primary bg-primary flex-1 py-2 text-xs text-white"
+              >
+                {t('Assign & Start Play')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

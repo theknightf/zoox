@@ -2,17 +2,60 @@
 import React, { useState } from 'react';
 import { Star, ThumbsUp, Minus, ThumbsDown, AlertTriangle, X } from 'lucide-react';
 import type { LiveSession } from './LiveSessionsContent';
+import { useTranslation } from '@/i18n';
 import { toast } from 'sonner';
 
 type Rating = 'excellent' | 'good' | 'normal' | 'difficult' | 'problematic';
 type Reason = 'noise' | 'argument' | 'aggressive' | 'damage' | 'disrespectful' | 'other';
 
-const ratings: { id: Rating; label: string; icon: React.ReactNode; color: string; bg: string; border: string }[] = [
-  { id: 'excellent', label: 'Excellent', icon: <Star size={20} />, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/30' },
-  { id: 'good', label: 'Good', icon: <ThumbsUp size={20} />, color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/30' },
-  { id: 'normal', label: 'Normal', icon: <Minus size={20} />, color: 'text-muted-foreground', bg: 'bg-muted', border: 'border-border' },
-  { id: 'difficult', label: 'Difficult', icon: <ThumbsDown size={20} />, color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/30' },
-  { id: 'problematic', label: 'Problematic', icon: <AlertTriangle size={20} />, color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/30' },
+const ratings: {
+  id: Rating;
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+  bg: string;
+  border: string;
+}[] = [
+  {
+    id: 'excellent',
+    label: 'Excellent',
+    icon: <Star size={20} />,
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/30',
+  },
+  {
+    id: 'good',
+    label: 'Good',
+    icon: <ThumbsUp size={20} />,
+    color: 'text-accent',
+    bg: 'bg-accent/10',
+    border: 'border-accent/30',
+  },
+  {
+    id: 'normal',
+    label: 'Normal',
+    icon: <Minus size={20} />,
+    color: 'text-muted-foreground',
+    bg: 'bg-muted',
+    border: 'border-border',
+  },
+  {
+    id: 'difficult',
+    label: 'Difficult',
+    icon: <ThumbsDown size={20} />,
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/30',
+  },
+  {
+    id: 'problematic',
+    label: 'Problematic',
+    icon: <AlertTriangle size={20} />,
+    color: 'text-danger',
+    bg: 'bg-danger/10',
+    border: 'border-danger/30',
+  },
 ];
 
 const reasons: { id: Reason; label: string }[] = [
@@ -30,6 +73,7 @@ interface EvaluationPopupProps {
 }
 
 export default function EvaluationPopup({ session, onComplete }: EvaluationPopupProps) {
+  const { t } = useTranslation();
   const [selectedRating, setSelectedRating] = useState<Rating | null>(null);
   const [selectedReasons, setSelectedReasons] = useState<Reason[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +91,7 @@ export default function EvaluationPopup({ session, onComplete }: EvaluationPopup
     setIsSubmitting(true);
     // Backend integration point: POST /api/customers/:id/evaluation with { rating, reasons, sessionId }
     await new Promise((r) => setTimeout(r, 600));
-    toast.success(`Evaluation submitted for ${session.customer}`);
+    toast.success(t('Evaluation submitted for ') + session.customer);
     setIsSubmitting(false);
     onComplete(session.id);
   };
@@ -62,8 +106,12 @@ export default function EvaluationPopup({ session, onComplete }: EvaluationPopup
       <div className="relative bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl slide-up">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Session Closed</p>
-            <h2 className="text-base font-bold text-foreground mt-0.5">Rate this customer</h2>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {t('Session Closed')}
+            </p>
+            <h2 className="text-base font-bold text-foreground mt-0.5">
+              {t('Rate this customer')}
+            </h2>
           </div>
           <button
             onClick={handleSkip}
@@ -76,17 +124,17 @@ export default function EvaluationPopup({ session, onComplete }: EvaluationPopup
         <div className="px-5 pb-2">
           <div className="flex items-center gap-2 bg-muted/40 rounded-xl p-3 mb-4">
             <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-bold text-primary">
-                {session.customer.charAt(0)}
-              </span>
+              <span className="text-xs font-bold text-primary">{session.customer.charAt(0)}</span>
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">{session.customer}</p>
-              <p className="text-xs text-muted-foreground">{session.room} · {session.game}</p>
+              <p className="text-xs text-muted-foreground">
+                {session.room} · {session.game}
+              </p>
             </div>
           </div>
 
-          <p className="text-sm font-medium text-foreground mb-3">How was this customer?</p>
+          <p className="text-sm font-medium text-foreground mb-3">{t('How was this customer?')}</p>
           <div className="grid grid-cols-5 gap-1.5 mb-4">
             {ratings.map((r) => (
               <button
@@ -104,7 +152,9 @@ export default function EvaluationPopup({ session, onComplete }: EvaluationPopup
                 }`}
               >
                 <span className={selectedRating === r.id ? r.color : ''}>{r.icon}</span>
-                <span className="text-xs font-semibold leading-tight text-center">{r.label}</span>
+                <span className="text-xs font-semibold leading-tight text-center">
+                  {t(r.label)}
+                </span>
               </button>
             ))}
           </div>
@@ -112,7 +162,7 @@ export default function EvaluationPopup({ session, onComplete }: EvaluationPopup
           {showReasons && (
             <div className="mb-4 fade-in">
               <p className="text-xs font-semibold text-muted-foreground mb-2">
-                What happened? (optional)
+                {t('What happened? (optional)')}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {reasons.map((reason) => (
@@ -121,10 +171,11 @@ export default function EvaluationPopup({ session, onComplete }: EvaluationPopup
                     onClick={() => toggleReason(reason.id)}
                     className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all duration-150 ${
                       selectedReasons.includes(reason.id)
-                        ? 'bg-danger/10 border border-danger/30 text-danger' :'bg-muted border border-border text-muted-foreground hover:text-foreground'
+                        ? 'bg-danger/10 border border-danger/30 text-danger'
+                        : 'bg-muted border border-border text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    {reason.label}
+                    {t(reason.label)}
                   </button>
                 ))}
               </div>
@@ -134,7 +185,7 @@ export default function EvaluationPopup({ session, onComplete }: EvaluationPopup
 
         <div className="px-5 pb-5 flex gap-2">
           <button onClick={handleSkip} className="btn-secondary flex-1 text-sm">
-            Skip
+            {t('Skip')}
           </button>
           <button
             onClick={handleSubmit}
@@ -144,7 +195,7 @@ export default function EvaluationPopup({ session, onComplete }: EvaluationPopup
             {isSubmitting ? (
               <div className="w-3.5 h-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
             ) : (
-              'Submit'
+              t('Submit')
             )}
           </button>
         </div>

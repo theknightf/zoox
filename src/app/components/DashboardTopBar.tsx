@@ -1,8 +1,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '@/i18n';
 import { Search, Bell, RefreshCw } from 'lucide-react';
 
 export default function DashboardTopBar() {
+  const { t } = useTranslation();
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
 
@@ -10,10 +12,20 @@ export default function DashboardTopBar() {
     const update = () => {
       const now = new Date();
       setCurrentTime(
-        now?.toLocaleTimeString('en-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+        now?.toLocaleTimeString('en-EG', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        })
       );
       setCurrentDate(
-        now?.toLocaleDateString('en-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+        now?.toLocaleDateString('en-EG', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
       );
     };
     update();
@@ -24,15 +36,18 @@ export default function DashboardTopBar() {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Staff Dashboard</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('Staff Dashboard')}</h1>
         <p className="text-sm text-muted-foreground mt-0.5">{currentDate}</p>
       </div>
       <div className="flex items-center gap-3">
         <div className="relative">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             type="text"
-            placeholder="Quick search customer..."
+            placeholder={t('Quick search customer...')}
             className="input-field pl-9 w-56 text-sm h-9"
           />
         </div>

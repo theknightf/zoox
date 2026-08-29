@@ -1,15 +1,41 @@
 import React from 'react';
 import AppLogo from '@/components/ui/AppLogo';
 import { Monitor, Users, Gamepad2, TrendingUp } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 const liveStats = [
-  { id: 'bp-stat-1', label: 'Active Sessions', value: '6', icon: <Monitor size={14} />, color: 'text-accent' },
-  { id: 'bp-stat-2', label: 'Waiting', value: '3', icon: <Users size={14} />, color: 'text-warning' },
-  { id: 'bp-stat-3', label: 'Controllers', value: '40', icon: <Gamepad2 size={14} />, color: 'text-primary' },
-  { id: 'bp-stat-4', label: "Today\'s EGP", value: '2,840', icon: <TrendingUp size={14} />, color: 'text-info' },
+  {
+    id: 'bp-stat-1',
+    label: 'Active Sessions',
+    value: '6',
+    icon: <Monitor size={14} />,
+    color: 'text-accent',
+  },
+  {
+    id: 'bp-stat-2',
+    label: 'Waiting',
+    value: '3',
+    icon: <Users size={14} />,
+    color: 'text-warning',
+  },
+  {
+    id: 'bp-stat-3',
+    label: 'Controllers',
+    value: '40',
+    icon: <Gamepad2 size={14} />,
+    color: 'text-primary',
+  },
+  {
+    id: 'bp-stat-4',
+    label: "Today\'s EGP",
+    value: '2,840',
+    icon: <TrendingUp size={14} />,
+    color: 'text-info',
+  },
 ];
 
 export default function BrandPanel() {
+  const { t } = useTranslation();
   return (
     <div className="hidden lg:flex lg:w-[45%] xl:w-[50%] bg-card border-r border-border flex-col justify-between p-10 relative overflow-hidden">
       {/* Background decoration */}
@@ -22,27 +48,31 @@ export default function BrandPanel() {
           <AppLogo size={40} />
           <div>
             <span className="text-xl font-bold text-foreground tracking-tight">Zoox</span>
-            <p className="text-xs text-muted-foreground">PlayStation Management</p>
+            <p className="text-xs text-muted-foreground">{t('PlayStation Management')}</p>
           </div>
         </div>
 
         <h2 className="text-3xl font-bold text-foreground leading-tight mb-4">
-          Run your gaming center
+          {t('Run your gaming center')}
           <br />
-          <span className="text-primary">at full speed.</span>
+          <span className="text-primary">{t('at full speed.')}</span>
         </h2>
         <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
-          Manage rooms, sessions, reservations, café sales, and customer loyalty — all from one operational dashboard built for speed.
+          {t(
+            'Manage rooms, sessions, reservations, café sales, and customer loyalty — all from one operational dashboard built for speed.'
+          )}
         </p>
       </div>
       <div className="relative z-10 space-y-4">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Live Center Status</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+          {t('Live Center Status')}
+        </p>
         <div className="grid grid-cols-2 gap-3">
           {liveStats?.map((stat) => (
             <div key={stat?.id} className="bg-background/60 border border-border rounded-xl p-3">
               <div className="flex items-center gap-2 mb-1">
                 <span className={stat?.color}>{stat?.icon}</span>
-                <span className="text-xs text-muted-foreground">{stat?.label}</span>
+                <span className="text-xs text-muted-foreground">{t(stat?.label)}</span>
               </div>
               <p className={`text-xl font-bold font-tabular ${stat?.color}`}>{stat?.value}</p>
             </div>
@@ -51,7 +81,9 @@ export default function BrandPanel() {
 
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-          <p className="text-xs text-muted-foreground">Live data — updates every 30 seconds</p>
+          <p className="text-xs text-muted-foreground">
+            {t('Live data — updates every 30 seconds')}
+          </p>
         </div>
       </div>
     </div>

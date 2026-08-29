@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Copy, Check, LogIn } from 'lucide-react';
-
+import { useTranslation } from '@/i18n';
 
 interface LoginFormData {
   email: string;
@@ -29,6 +29,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -47,12 +48,10 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
     setIsLoading(true);
     // Backend integration point: POST /api/auth/login with { email, password }
     await new Promise((r) => setTimeout(r, 1200));
-    const valid = demoAccounts.find(
-      (a) => a.email === data.email && a.password === data.password
-    );
+    const valid = demoAccounts.find((a) => a.email === data.email && a.password === data.password);
     if (!valid) {
       setError('email', {
-        message: 'Invalid credentials — use the demo accounts below to sign in',
+        message: t('Invalid credentials — use the demo accounts below to sign in'),
       });
       setIsLoading(false);
       return;
@@ -82,32 +81,30 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
           </div>
           <span className="font-bold text-lg text-foreground">Zoox</span>
         </div>
-        <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
-        <p className="text-sm text-muted-foreground mt-1">Sign in to your Zoox dashboard</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('Welcome back')}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t('Sign in to your Zoox dashboard')}</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-sm font-semibold text-foreground mb-1.5">
-            Email address
+            {t('Email address')}
           </label>
           <input
             type="email"
             className={`input-field ${errors.email ? 'border-danger focus:ring-danger/50' : ''}`}
             placeholder="you@zoox-ps.com"
             {...register('email', {
-              required: 'Email is required',
-              pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email' },
+              required: t('Email is required'),
+              pattern: { value: /^\S+@\S+\.\S+$/, message: t('Enter a valid email') },
             })}
           />
-          {errors.email && (
-            <p className="text-xs text-danger mt-1.5">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-xs text-danger mt-1.5">{errors.email.message}</p>}
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-foreground mb-1.5">
-            Password
+            {t('Password')}
           </label>
           <div className="relative">
             <input
@@ -115,8 +112,8 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
               className={`input-field pr-10 ${errors.password ? 'border-danger focus:ring-danger/50' : ''}`}
               placeholder="••••••••••"
               {...register('password', {
-                required: 'Password is required',
-                minLength: { value: 6, message: 'Password must be at least 6 characters' },
+                required: t('Password is required'),
+                minLength: { value: 6, message: t('Password must be at least 6 characters') },
               })}
             />
             <button
@@ -139,10 +136,10 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
               className="w-4 h-4 rounded border-border bg-input accent-primary"
               {...register('remember')}
             />
-            <span className="text-sm text-muted-foreground">Remember me</span>
+            <span className="text-sm text-muted-foreground">{t('Remember me')}</span>
           </label>
           <button type="button" className="text-sm text-primary font-semibold hover:underline">
-            Forgot password?
+            {t('Forgot password?')}
           </button>
         </div>
 
@@ -156,25 +153,24 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
           ) : (
             <>
               <LogIn size={16} />
-              Sign In
+              {t('Sign In')}
             </>
           )}
         </button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground mt-6">
-        New to Zoox?{' '}
-        <button
-          onClick={onSwitchToSignUp}
-          className="text-primary font-semibold hover:underline"
-        >
-          Create an account
+        {t('New to Zoox?')}{' '}
+        <button onClick={onSwitchToSignUp} className="text-primary font-semibold hover:underline">
+          {t('Create an account')}
         </button>
       </p>
 
       {/* Demo credentials */}
       <div className="mt-8 p-4 bg-muted/50 border border-border rounded-xl">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Demo Accounts</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">
+          {t('Demo Accounts')}
+        </p>
         <div className="space-y-2">
           {demoAccounts.map((account) => (
             <div
@@ -183,24 +179,37 @@ export default function LoginForm({ onSwitchToSignUp }: LoginFormProps) {
               onClick={() => fillCredentials(account)}
             >
               <div className="flex items-center gap-2 min-w-0">
-                <span className={`text-xs font-bold w-16 flex-shrink-0 ${account.color}`}>{account.role}</span>
+                <span className={`text-xs font-bold w-16 flex-shrink-0 ${account.color}`}>
+                  {t(account.role)}
+                </span>
                 <span className="text-xs text-muted-foreground truncate">{account.email}</span>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); copyToClipboard(account.email, `email-${account.role}`); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard(account.email, `email-${account.role}`);
+                  }}
                   className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                  title="Copy email"
+                  title={t('Copy email')}
                 >
-                  {copiedField === `email-${account.role}` ? <Check size={11} className="text-accent" /> : <Copy size={11} />}
+                  {copiedField === `email-${account.role}` ? (
+                    <Check size={11} className="text-accent" />
+                  ) : (
+                    <Copy size={11} />
+                  )}
                 </button>
-                <span className="text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Use →</span>
+                <span className="text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                  {t('Use →')}
+                </span>
               </div>
             </div>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground mt-2">Click any row to autofill credentials</p>
+        <p className="text-xs text-muted-foreground mt-2">
+          {t('Click any row to autofill credentials')}
+        </p>
       </div>
     </div>
   );

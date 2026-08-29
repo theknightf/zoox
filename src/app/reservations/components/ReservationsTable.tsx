@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ArrowUpDown, Eye, PlayCircle, Ban, UserCheck, MoreHorizontal } from 'lucide-react';
 import type { Reservation, ReservationStatus } from './ReservationsContent';
 import { toast } from 'sonner';
+import { useTranslation } from '@/i18n';
 
 const statusStyles: Record<ReservationStatus, { bg: string; text: string; dot: string }> = {
   Reserved: { bg: 'bg-info/10', text: 'text-info', dot: 'bg-info' },
@@ -13,6 +14,9 @@ const statusStyles: Record<ReservationStatus, { bg: string; text: string; dot: s
   'No Show': { bg: 'bg-danger/10', text: 'text-danger', dot: 'bg-danger' },
   Waiting: { bg: 'bg-warning/10', text: 'text-warning', dot: 'bg-warning' },
   Late: { bg: 'bg-warning/10', text: 'text-warning', dot: 'bg-warning' },
+  Pending: { bg: 'bg-warning/10', text: 'text-warning', dot: 'bg-warning' },
+  Confirmed: { bg: 'bg-accent/10', text: 'text-accent', dot: 'bg-accent' },
+  'No-Show': { bg: 'bg-danger/10', text: 'text-danger', dot: 'bg-danger' },
 };
 
 const customerStatusStyles: Record<string, string> = {
@@ -31,7 +35,11 @@ interface ReservationsTableProps {
 type SortKey = 'customer' | 'room' | 'game' | 'date' | 'time' | 'status';
 type SortDir = 'asc' | 'desc';
 
-export default function ReservationsTable({ reservations, onStatusChange }: ReservationsTableProps) {
+export default function ReservationsTable({
+  reservations,
+  onStatusChange,
+}: ReservationsTableProps) {
+  const { t } = useTranslation();
   const [sortKey, setSortKey] = useState<SortKey>('time');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [openStatusMenu, setOpenStatusMenu] = useState<string | null>(null);
@@ -64,14 +72,17 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
       className="flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors group"
     >
       {label}
-      <ArrowUpDown size={11} className={`transition-colors ${sortKey === sKey ? 'text-primary' : 'group-hover:text-foreground'}`} />
+      <ArrowUpDown
+        size={11}
+        className={`transition-colors ${sortKey === sKey ? 'text-primary' : 'group-hover:text-foreground'}`}
+      />
     </button>
   );
 
   const handleStatusUpdate = (id: string, status: ReservationStatus) => {
     onStatusChange(id, status);
     setOpenStatusMenu(null);
-    toast.success(`Status updated to ${status}`);
+    toast.success(`${t('Status updated to')} ${t(status)}`);
   };
 
   if (reservations.length === 0) {
@@ -80,9 +91,11 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
         <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mb-4">
           <Eye size={28} className="text-muted-foreground" />
         </div>
-        <p className="text-base font-semibold text-foreground mb-1">No reservations found</p>
+        <p className="text-base font-semibold text-foreground mb-1">{t('No reservations found')}</p>
         <p className="text-sm text-muted-foreground max-w-sm">
-          No reservations match your current filters. Try adjusting the date or status filter, or create a new reservation.
+          {t(
+            'No reservations match your current filters. Try adjusting the date or status filter, or create a new reservation.'
+          )}
         </p>
       </div>
     );
@@ -97,16 +110,36 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
               <th className="text-left px-4 py-3 w-8">
                 <input type="checkbox" className="w-3.5 h-3.5 accent-primary" />
               </th>
-              <th className="text-left px-4 py-3"><SortHeader label="Customer" sKey="customer" /></th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">Phone</th>
-              <th className="text-left px-4 py-3"><SortHeader label="Room" sKey="room" /></th>
-              <th className="text-left px-4 py-3"><SortHeader label="Game" sKey="game" /></th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">Players</th>
-              <th className="text-left px-4 py-3"><SortHeader label="Date" sKey="date" /></th>
-              <th className="text-left px-4 py-3"><SortHeader label="Time" sKey="time" /></th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">Duration</th>
-              <th className="text-left px-4 py-3"><SortHeader label="Status" sKey="status" /></th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">Actions</th>
+              <th className="text-left px-4 py-3">
+                <SortHeader label={t('Customer')} sKey="customer" />
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">
+                {t('Phone')}
+              </th>
+              <th className="text-left px-4 py-3">
+                <SortHeader label={t('Room')} sKey="room" />
+              </th>
+              <th className="text-left px-4 py-3">
+                <SortHeader label={t('Game')} sKey="game" />
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">
+                {t('Players')}
+              </th>
+              <th className="text-left px-4 py-3">
+                <SortHeader label={t('Date')} sKey="date" />
+              </th>
+              <th className="text-left px-4 py-3">
+                <SortHeader label={t('Time')} sKey="time" />
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">
+                {t('Duration')}
+              </th>
+              <th className="text-left px-4 py-3">
+                <SortHeader label={t('Status')} sKey="status" />
+              </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">
+                {t('Actions')}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -123,8 +156,10 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
                   <td className="px-4 py-3">
                     <div>
                       <p className="text-sm font-semibold text-foreground">{res.customer}</p>
-                      <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${customerStatusStyles[res.customerStatus] || 'text-muted-foreground bg-muted'}`}>
-                        {res.customerStatus}
+                      <span
+                        className={`text-xs font-medium px-1.5 py-0.5 rounded ${customerStatusStyles[res.customerStatus] || 'text-muted-foreground bg-muted'}`}
+                      >
+                        {t(res.customerStatus)}
                       </span>
                     </div>
                   </td>
@@ -134,8 +169,10 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
                   <td className="px-4 py-3">
                     <div>
                       <p className="text-sm font-medium text-foreground">{res.room}</p>
-                      <span className={`text-xs ${res.roomType === 'VIP' ? 'text-warning' : res.roomType === 'Premium' ? 'text-info' : 'text-muted-foreground'}`}>
-                        {res.roomType}
+                      <span
+                        className={`text-xs ${res.roomType === 'VIP' ? 'text-warning' : res.roomType === 'Premium' ? 'text-info' : 'text-muted-foreground'}`}
+                      >
+                        {t(res.roomType)}
                       </span>
                     </div>
                   </td>
@@ -153,7 +190,7 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
                   </td>
                   <td className="px-4 py-3">
                     <p className="text-sm text-muted-foreground">
-                      {res.duration ? `${res.duration}min` : 'Open'}
+                      {res.duration ? `${res.duration}${t('min')}` : t('Open')}
                     </p>
                   </td>
                   <td className="px-4 py-3 relative">
@@ -162,17 +199,28 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
                       className={`status-badge cursor-pointer hover:opacity-80 transition-opacity ${sc.bg} ${sc.text}`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-                      {res.status}
+                      {t(res.status)}
                     </button>
                     {openStatusMenu === res.id && (
                       <div className="absolute top-full left-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-xl py-1 min-w-[140px] fade-in">
-                        {(['Reserved', 'Arrived', 'Active', 'Completed', 'Cancelled', 'No Show', 'Waiting', 'Late'] as ReservationStatus[]).map((s) => (
+                        {(
+                          [
+                            'Reserved',
+                            'Arrived',
+                            'Active',
+                            'Completed',
+                            'Cancelled',
+                            'No Show',
+                            'Waiting',
+                            'Late',
+                          ] as ReservationStatus[]
+                        ).map((s) => (
                           <button
                             key={`status-opt-${s}`}
                             onClick={() => handleStatusUpdate(res.id, s)}
                             className={`w-full text-left px-3 py-1.5 text-xs font-medium hover:bg-muted/50 transition-colors ${statusStyles[s].text}`}
                           >
-                            {s}
+                            {t(s)}
                           </button>
                         ))}
                       </div>
@@ -182,7 +230,7 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       {res.status === 'Reserved' || res.status === 'Arrived' ? (
                         <button
-                          title="Start session"
+                          title={t('Start session')}
                           onClick={() => handleStatusUpdate(res.id, 'Active')}
                           className="p-1.5 rounded-lg bg-accent/10 text-accent hover:bg-accent/20 transition-colors"
                         >
@@ -191,7 +239,7 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
                       ) : null}
                       {res.status === 'Reserved' ? (
                         <button
-                          title="Mark arrived"
+                          title={t('Mark arrived')}
                           onClick={() => handleStatusUpdate(res.id, 'Arrived')}
                           className="p-1.5 rounded-lg bg-info/10 text-info hover:bg-info/20 transition-colors"
                         >
@@ -200,14 +248,17 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
                       ) : null}
                       {res.status !== 'Completed' && res.status !== 'Cancelled' ? (
                         <button
-                          title="Cancel reservation"
+                          title={t('Cancel reservation')}
                           onClick={() => handleStatusUpdate(res.id, 'Cancelled')}
                           className="p-1.5 rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition-colors"
                         >
                           <Ban size={13} />
                         </button>
                       ) : null}
-                      <button title="More options" className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                      <button
+                        title={t('More options')}
+                        className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      >
                         <MoreHorizontal size={13} />
                       </button>
                     </div>
@@ -222,17 +273,24 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-border bg-muted/20">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Show</span>
+          <span>{t('Show')}</span>
           <select
             value={perPage}
-            onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
+            onChange={(e) => {
+              setPerPage(Number(e.target.value));
+              setPage(1);
+            }}
             className="bg-input border border-border rounded-lg px-2 py-1 text-xs text-foreground"
           >
             {[10, 25, 50].map((n) => (
-              <option key={`per-page-${n}`} value={n}>{n}</option>
+              <option key={`per-page-${n}`} value={n}>
+                {n}
+              </option>
             ))}
           </select>
-          <span>of {sorted.length} reservations</span>
+          <span>
+            {t('of')} {sorted.length} {t('reservations')}
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -240,14 +298,16 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
             disabled={page === 1}
             className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-muted text-muted-foreground hover:text-foreground disabled:opacity-40 transition-colors"
           >
-            Prev
+            {t('Prev')}
           </button>
           {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
             <button
               key={`page-${p}`}
               onClick={() => setPage(p)}
               className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                page === p ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'
+                page === p
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:text-foreground'
               }`}
             >
               {p}
@@ -258,7 +318,7 @@ export default function ReservationsTable({ reservations, onStatusChange }: Rese
             disabled={page === totalPages}
             className="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-muted text-muted-foreground hover:text-foreground disabled:opacity-40 transition-colors"
           >
-            Next
+            {t('Next')}
           </button>
         </div>
       </div>

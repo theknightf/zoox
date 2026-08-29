@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { X, Calendar, Gamepad2, Users, AlertCircle } from 'lucide-react';
 import type { Reservation, ReservationStatus } from './ReservationsContent';
 import { toast } from 'sonner';
+import { useTranslation } from '@/i18n';
 
 interface DrawerFormData {
   customer: string;
@@ -28,7 +29,16 @@ const rooms = [
   { id: 'room-008', name: 'Room 8', type: 'VIP', capacity: 8 },
 ];
 
-const games = ['FC 26', 'GTA V', 'Call of Duty', 'PES 2024', 'Mortal Kombat 1', 'WWE 2K25', 'Spider-Man 2', 'God of War'];
+const games = [
+  'FC 26',
+  'GTA V',
+  'Call of Duty',
+  'PES 2024',
+  'Mortal Kombat 1',
+  'WWE 2K25',
+  'Spider-Man 2',
+  'God of War',
+];
 
 const durationOptions = [
   { value: '', label: 'Open-ended (no limit)' },
@@ -45,8 +55,9 @@ interface ReservationDrawerProps {
 }
 
 export default function ReservationDrawer({ onClose, onSave }: ReservationDrawerProps) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<typeof rooms[0] | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<(typeof rooms)[0] | null>(null);
 
   const {
     register,
@@ -93,7 +104,7 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
     };
 
     onSave(newRes);
-    toast.success(`Reservation created for ${data.customer}`);
+    toast.success(`${t('Reservation created for')} ${data.customer}`);
     setIsLoading(false);
   };
 
@@ -104,8 +115,10 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
         {/* Header */}
         <div className="sticky top-0 bg-card border-b border-border px-5 py-4 flex items-center justify-between z-10">
           <div>
-            <h2 className="text-base font-bold text-foreground">New Reservation</h2>
-            <p className="text-xs text-muted-foreground">Fill in the booking details below</p>
+            <h2 className="text-base font-bold text-foreground">{t('New Reservation')}</h2>
+            <p className="text-xs text-muted-foreground">
+              {t('Fill in the booking details below')}
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -118,17 +131,17 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
         <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-5">
           {/* Customer info */}
           <div className="space-y-4">
-            <p className="section-label">Customer Information</p>
+            <p className="section-label">{t('Customer Information')}</p>
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Customer Name <span className="text-danger">*</span>
+                {t('Customer Name')} <span className="text-danger">*</span>
               </label>
               <input
                 type="text"
                 className={`input-field ${errors.customer ? 'border-danger' : ''}`}
-                placeholder="Full name"
-                {...register('customer', { required: 'Customer name is required' })}
+                placeholder={t('Full name')}
+                {...register('customer', { required: t('Customer name is required') })}
               />
               {errors.customer && (
                 <p className="text-xs text-danger mt-1">{errors.customer.message}</p>
@@ -137,57 +150,54 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Phone Number <span className="text-danger">*</span>
+                {t('Phone Number')} <span className="text-danger">*</span>
               </label>
               <p className="text-xs text-muted-foreground mb-1.5">
-                Used for reminders and notifications
+                {t('Used for reminders and notifications')}
               </p>
               <input
                 type="tel"
                 className={`input-field ${errors.phone ? 'border-danger' : ''}`}
-                placeholder="01xxxxxxxxx"
+                placeholder={t('01xxxxxxxxx')}
                 {...register('phone', {
-                  required: 'Phone number is required',
+                  required: t('Phone number is required'),
                   pattern: {
                     value: /^01[0-9]{9}$/,
-                    message: 'Enter a valid Egyptian mobile number (01xxxxxxxxx)',
+                    message: t('Enter a valid Egyptian mobile number (01xxxxxxxxx)'),
                   },
                 })}
               />
-              {errors.phone && (
-                <p className="text-xs text-danger mt-1">{errors.phone.message}</p>
-              )}
+              {errors.phone && <p className="text-xs text-danger mt-1">{errors.phone.message}</p>}
             </div>
           </div>
 
           {/* Booking details */}
           <div className="space-y-4 pt-2 border-t border-border">
-            <p className="section-label pt-2">Booking Details</p>
+            <p className="section-label pt-2">{t('Booking Details')}</p>
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Room <span className="text-danger">*</span>
+                {t('Room')} <span className="text-danger">*</span>
               </label>
               <select
                 className={`input-field ${errors.room ? 'border-danger' : ''}`}
-                {...register('room', { required: 'Room selection is required' })}
+                {...register('room', { required: t('Room selection is required') })}
                 onChange={(e) => {
                   setSelectedRoom(rooms.find((r) => r.name === e.target.value) || null);
                 }}
               >
-                <option value="">Select a room</option>
+                <option value="">{t('Select a room')}</option>
                 {rooms.map((r) => (
                   <option key={r.id} value={r.name}>
-                    {r.name} — {r.type} (max {r.capacity} players)
+                    {r.name} — {t(r.type)} (max {r.capacity} {t('players')})
                   </option>
                 ))}
               </select>
-              {errors.room && (
-                <p className="text-xs text-danger mt-1">{errors.room.message}</p>
-              )}
+              {errors.room && <p className="text-xs text-danger mt-1">{errors.room.message}</p>}
               {selectedRoom && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  {selectedRoom.type} room · maximum capacity: {selectedRoom.capacity} players
+                  {t(selectedRoom.type)} {t('room')} · {t('maximum capacity')}:{' '}
+                  {selectedRoom.capacity} {t('players')}
                 </p>
               )}
             </div>
@@ -195,29 +205,29 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
             <div>
               <label className="block text-sm font-semibold text-foreground mb-1.5">
                 <Gamepad2 size={13} className="inline mr-1" />
-                Game <span className="text-danger">*</span>
+                {t('Game')} <span className="text-danger">*</span>
               </label>
               <p className="text-xs text-muted-foreground mb-1.5">
-                Only games available in the selected room will be valid
+                {t('Only games available in the selected room will be valid')}
               </p>
               <select
                 className={`input-field ${errors.game ? 'border-danger' : ''}`}
-                {...register('game', { required: 'Game selection is required' })}
+                {...register('game', { required: t('Game selection is required') })}
               >
-                <option value="">Select a game</option>
+                <option value="">{t('Select a game')}</option>
                 {games.map((g) => (
-                  <option key={`game-${g}`} value={g}>{g}</option>
+                  <option key={`game-${g}`} value={g}>
+                    {g}
+                  </option>
                 ))}
               </select>
-              {errors.game && (
-                <p className="text-xs text-danger mt-1">{errors.game.message}</p>
-              )}
+              {errors.game && <p className="text-xs text-danger mt-1">{errors.game.message}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-1.5">
                 <Users size={13} className="inline mr-1" />
-                Number of Players <span className="text-danger">*</span>
+                {t('Number of Players')} <span className="text-danger">*</span>
               </label>
               <input
                 type="number"
@@ -225,9 +235,9 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
                 max={8}
                 className={`input-field ${errors.players || capacityExceeded ? 'border-danger' : ''}`}
                 {...register('players', {
-                  required: 'Number of players is required',
-                  min: { value: 1, message: 'At least 1 player required' },
-                  max: { value: 8, message: 'Maximum 8 players per session' },
+                  required: t('Number of players is required'),
+                  min: { value: 1, message: t('At least 1 player required') },
+                  max: { value: 8, message: t('Maximum 8 players per session') },
                 })}
               />
               {errors.players && (
@@ -237,7 +247,8 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
                 <div className="flex items-center gap-1.5 mt-1.5 p-2 bg-danger/10 border border-danger/20 rounded-lg">
                   <AlertCircle size={12} className="text-danger flex-shrink-0" />
                   <p className="text-xs text-danger">
-                    Exceeds room capacity ({roomObj?.capacity} max). Choose a larger room or reduce players.
+                    {t('Exceeds room capacity')} ({roomObj?.capacity} {t('max')}).{' '}
+                    {t('Choose a larger room or reduce players.')}
                   </p>
                 </div>
               )}
@@ -246,63 +257,57 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
 
           {/* Schedule */}
           <div className="space-y-4 pt-2 border-t border-border">
-            <p className="section-label pt-2">Schedule</p>
+            <p className="section-label pt-2">{t('Schedule')}</p>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-1.5">
                   <Calendar size={13} className="inline mr-1" />
-                  Date <span className="text-danger">*</span>
+                  {t('Date')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="date"
                   className={`input-field ${errors.date ? 'border-danger' : ''}`}
                   {...register('date', { required: 'Date is required' })}
                 />
-                {errors.date && (
-                  <p className="text-xs text-danger mt-1">{errors.date.message}</p>
-                )}
+                {errors.date && <p className="text-xs text-danger mt-1">{errors.date.message}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-1.5">
-                  Start Time <span className="text-danger">*</span>
+                  {t('Start Time')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="time"
                   className={`input-field ${errors.time ? 'border-danger' : ''}`}
                   {...register('time', { required: 'Start time is required' })}
                 />
-                {errors.time && (
-                  <p className="text-xs text-danger mt-1">{errors.time.message}</p>
-                )}
+                {errors.time && <p className="text-xs text-danger mt-1">{errors.time.message}</p>}
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Session Duration
+                {t('Session Duration')}
               </label>
               <p className="text-xs text-muted-foreground mb-1.5">
-                Leave empty for an open-ended session — billed by actual time played
+                {t('Leave empty for an open-ended session — billed by actual time played')}
               </p>
-              <select
-                className="input-field"
-                {...register('duration')}
-              >
+              <select className="input-field" {...register('duration')}>
                 {durationOptions.map((opt) => (
                   <option key={`dur-${opt.value || 'open'}`} value={opt.value}>
-                    {opt.label}
+                    {t(opt.label)}
                   </option>
                 ))}
               </select>
               {watchedDuration ? (
                 <p className="text-xs text-info mt-1.5">
-                  Fixed session — {watchedDuration} minutes. Customer will be notified 10 minutes before end.
+                  {t('Fixed session —')} {watchedDuration}{' '}
+                  {t('minutes. Customer will be notified 10 minutes before end.')}
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground mt-1.5">
-                  Open-ended session — staff ends manually and bills actual time.
+                  {t('Open-ended session — staff ends manually and bills actual time.')}
                 </p>
               )}
             </div>
@@ -313,9 +318,11 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
             <div className="flex items-start gap-2">
               <AlertCircle size={13} className="text-warning flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-semibold text-warning">Grace Period Policy</p>
+                <p className="text-xs font-semibold text-warning">{t('Grace Period Policy')}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Customer has a 10-minute grace period after the reserved start time. After that, the system will flag the reservation as Late or No Show based on center settings.
+                  {t(
+                    'Customer has a 10-minute grace period after the reserved start time. After that, the system will flag the reservation as Late or No Show based on center settings.'
+                  )}
                 </p>
               </div>
             </div>
@@ -323,15 +330,15 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
 
           {/* Notes */}
           <div className="pt-2 border-t border-border">
-            <p className="section-label pt-2 mb-3">Additional Notes</p>
+            <p className="section-label pt-2 mb-3">{t('Additional Notes')}</p>
             <div>
               <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Notes (optional)
+                {t('Notes (optional)')}
               </label>
               <textarea
                 rows={3}
                 className="input-field resize-none"
-                placeholder="Special requests, customer preferences, VIP notes..."
+                placeholder={t('Special requests, customer preferences, VIP notes...')}
                 {...register('notes')}
               />
             </div>
@@ -339,12 +346,8 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
 
           {/* Sticky footer */}
           <div className="sticky bottom-0 bg-card border-t border-border -mx-5 px-5 py-4 flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-secondary flex-1"
-            >
-              Cancel
+            <button type="button" onClick={onClose} className="btn-secondary flex-1">
+              {t('Cancel')}
             </button>
             <button
               type="submit"
@@ -354,7 +357,7 @@ export default function ReservationDrawer({ onClose, onSave }: ReservationDrawer
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
               ) : (
-                'Create Reservation'
+                t('Create Reservation')
               )}
             </button>
           </div>
